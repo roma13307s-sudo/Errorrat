@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Locked</title>
+    <style>
+        body {
+            background-color: #0000aa;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        h1 { font-size: 22px; margin-bottom: 15px; text-transform: uppercase; }
+        p { font-size: 14px; margin-bottom: 25px; line-height: 1.4; max-width: 320px; }
+        input {
+            background: #000066;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 12px;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 4px;
+            width: 80%;
+            max-width: 260px;
+            margin-bottom: 15px;
+            outline: none;
+            font-family: monospace;
+        }
+        button {
+            background: #fff;
+            color: #0000aa;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .error { color: #ff3333; margin-top: 15px; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <h1>:(</h1>
+    <h1>Критическая ошибка системы</h1>
+    <p>Устройство заблокировано из-за обнаружения вредоносного ПО. Все фоновые процессы остановлены. Введите пароль разблокировки:</p>
+    
+    <input type="password" id="passInput" placeholder="ПИН-КОД" autocomplete="off">
+    <br>
+    <button onclick="checkPass()">РАЗБЛОКИРОВАТЬ</button>
+    <div id="errorMsg" class="error"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation(); // Защита от закрытия
+
+        // Генерация резкого писка (сигнала тревоги) при загрузке страницы через Web Audio API
+        function playBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sawtooth';
+                osc.frequency.value = 880; // Высокий неприятный тон
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8); // Пищит 0.8 секунды
+            } catch(e) {
+                console.log("Audio not allowed");
+            }
+        }
+
+        // Запускаем писк при первом клике или сразу
+        window.onload = () => {
+            playBeep();
+        };
+
+        function checkPass() {
+            const val = document.getElementById('passInput').value;
+            if (val === "1234") {
+                alert("Система разблокирована!");
+                tg.close();
+            } else {
+                document.getElementById('errorMsg').innerText = "НЕВЕРНЫЙ КОД! ТЕЛЕФОН БЛОКИРУЕТСЯ.";
+                playBeep();
+            }
+        }
+    </script>
+</body>
+</html>
